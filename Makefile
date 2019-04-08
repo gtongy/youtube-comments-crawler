@@ -16,4 +16,5 @@ local-exec:
 	--region ap-northeast-1 \
 	--env-vars env.json \
 	--event event.json \
-	--template=deploy/template/staging.yml
+	--template=deploy/template/staging.yml \
+	--docker-network minio-network

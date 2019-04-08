@@ -30,3 +30,5 @@ Resources:
           ENV: "staging"
           ACCESS_KEY: ""
           SECRET_KEY: ""
+          SERVICE_ACCOUNT_KEY: ""
+          SERVICE_BUCKET: ""
