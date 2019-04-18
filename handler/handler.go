@@ -21,7 +21,7 @@ const (
 	// RequestSucessMessage は実行に成功時に返却するメッセージです
 	RequestSucessMessage = "実行に成功しました"
 	region               = endpoints.ApNortheast1RegionID
-	maxResult            = 3
+	maxResult            = 10
 )
 
 type Video struct {
@@ -49,17 +49,17 @@ func getVideosById(service *youtube.Service, part string, id string) []Video {
 	return videos
 }
 
-func getCaptionIdsByVideos(service *youtube.Service, part string, videos []Video) []string {
-	var captionIds []string
-	for _, video := range videos {
-		call := service.Captions.List(part, video.ID)
-		response, err := call.Do()
-		handleError(err, "")
-		if response.Items != nil {
-			captionIds = append(captionIds, response.Items[0].Id)
-		}
+func getCommentsByVideo(service *youtube.Service, part string, video Video) []string {
+	call := service.CommentThreads.List(part)
+	call = call.VideoId(video.ID).MaxResults(maxResult).TextFormat("plainText")
+	response, err := call.Do()
+	handleError(err, "")
+	var comments []string
+	for _, item := range response.Items {
+		fmt.Println(item.Snippet.TopLevelComment.Snippet.TextDisplay)
+		comments = append(comments, item.Snippet.TopLevelComment.Snippet.TextDisplay)
 	}
-	return captionIds
+	return comments
 }
 
 // Handler はLambdaの処理実行ハンドラです
@@ -87,8 +87,7 @@ func Handler(ctx context.Context, event events.CloudWatchEvent) (string, error) 
 	service, err := youtube.New(client)
 	handleError(err, "Error creating YouTube client")
 	videos := getVideosById(service, "snippet", "UC5ry_Nn-9q-aCO0irGxRRsA")
-	captionIds := getCaptionIdsByVideos(service, "snippet", videos)
-	fmt.Println(captionIds)
+	getCommentsByVideo(service, "snippet", videos[0])
 	return RequestSucessMessage, nil
 }
 
