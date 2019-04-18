@@ -11,8 +11,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/gtongy/used-clouthes-youtube-title-crawling/s3"
-	"github.com/gtongy/used-clouthes-youtube-title-crawling/youtubeWrapper"
+	"github.com/gtongy/youtube-comments-crawler/s3"
+	"github.com/gtongy/youtube-comments-crawler/youtubeWrapper"
 )
 
 const (
