@@ -19,7 +19,7 @@ list-tables:
 	--region ap-northeast-1 \
 	--endpoint-url http://localhost:8000
 
-ATTRIBUTE_DEFINITIONS ?= '[{"AttributeName":"id","AttributeType": "N"}]'
+ATTRIBUTE_DEFINITIONS ?= '[{"AttributeName":"id","AttributeType": "S"}]'
 KEY_SCHEMA ?= '[{"AttributeName":"id","KeyType": "HASH"}]'
 PROVISIONED_THROUGHPUT ?= '{"ReadCapacityUnits": 5,"WriteCapacityUnits": 5}'
 
@@ -39,6 +39,11 @@ delete-table:
 put-item:
 	aws dynamodb put-item --table-name $(TABLE_NAME) \
 	--item '$(ITEM)' \
+	--region ap-northeast-1 \
+	--endpoint-url http://localhost:8000
+
+scan-items:
+	aws dynamodb scan --table-name $(TABLE_NAME) \
 	--region ap-northeast-1 \
 	--endpoint-url http://localhost:8000
 
