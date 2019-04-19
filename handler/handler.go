@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/gtongy/youtube-comments-crawler/dynamodb"
-	"github.com/gtongy/youtube-comments-crawler/model"
 	"github.com/gtongy/youtube-comments-crawler/repository"
 	"github.com/gtongy/youtube-comments-crawler/s3"
 	"github.com/gtongy/youtube-comments-crawler/youtube"
@@ -28,20 +27,19 @@ const (
 func Handler(ctx context.Context, event events.CloudWatchEvent) (string, error) {
 	filename := serviceAccountFileDownload()
 	b, err := ioutil.ReadFile(filename)
+
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
+		return "", err
 	}
+
 	db := dynamo.New(session.New(), dynamodb.Config(region, dynamodbEndpoint))
-	youtubersTable := db.Table("Youtubers")
-	var youtubers []model.Youtuber
-	err = youtubersTable.Scan().All(&youtubers)
-	if err != nil {
-		log.Fatalf("scan error: %v", err)
-	}
+
 	youtubeClient := youtube.NewClient(b)
 	videoRepository := repository.Video{Table: db.Table("Videos")}
 	commentRepository := repository.Comment{Table: db.Table("Comments")}
-	for _, youtuber := range youtubers {
+	youtuberRepository := repository.Youtuber{Table: db.Table("Youtubers")}
+	for _, youtuber := range youtuberRepository.ScanAll() {
 		videos := youtubeClient.GetVideosIDsByChannelID(youtuber.ChannelID, maxVideosCount)
 		savedVideos := videoRepository.SaveAndGetVideos(videos)
 		for _, savedVideo := range savedVideos {
