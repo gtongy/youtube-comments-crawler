@@ -39,7 +39,7 @@ func Handler(ctx context.Context, event events.CloudWatchEvent) ([]string, error
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
 	db := dynamo.New(session.New(), &aws.Config{
-		Region:   aws.String("ap-northeast-1"),
+		Region:   aws.String(region),
 		Endpoint: aws.String(dynamodbEndpoint),
 	})
 	youtubersTable := db.Table("Youtubers")
