@@ -13,7 +13,7 @@ import (
 	"github.com/gtongy/youtube-comments-crawler/model"
 	"github.com/gtongy/youtube-comments-crawler/repository"
 	"github.com/gtongy/youtube-comments-crawler/s3"
-	"github.com/gtongy/youtube-comments-crawler/youtubeWrapper"
+	"github.com/gtongy/youtube-comments-crawler/youtube"
 	"github.com/guregu/dynamo"
 )
 
@@ -51,7 +51,7 @@ func Handler(ctx context.Context, event events.CloudWatchEvent) (string, error) 
 	if err != nil {
 		log.Fatalf("scan error: %v", err)
 	}
-	youtubeClient := youtubeWrapper.NewClient(b)
+	youtubeClient := youtube.NewClient(b)
 	videoRepository := repository.Video{Table: db.Table("Videos")}
 	commentRepository := repository.Comment{Table: db.Table("Comments")}
 	for _, youtuber := range youtubers {

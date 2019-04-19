@@ -1,4 +1,4 @@
-package youtubeWrapper
+package youtube
 
 import (
 	"context"
