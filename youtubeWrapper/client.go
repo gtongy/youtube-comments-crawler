@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gtongy/youtube-comments-crawler/model"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/youtube/v3"
 )
@@ -38,20 +39,21 @@ func NewClient(secretFile []byte) Client {
 	return Client{service: service}
 }
 
-// GetVideoIDsByChannelID is get video ids to use channel id
-func (c *Client) GetVideoIDsByChannelID(channelID string, maxResults int64) []string {
+// GetVideosIDsByChannelID is get video ids to use channel id
+// TODO: model.Video type is invalid
+func (c *Client) GetVideosIDsByChannelID(channelID string, maxResults int64) []model.Video {
 	call := c.service.Search.List("snippet")
 	call = call.ChannelId(channelID).MaxResults(maxResults).Order("date").Type("video")
 	response, err := call.Do()
 	handleError(err, "")
-	var videoIDs []string
+	var videos []model.Video
 	for _, item := range response.Items {
-		videoIDs = append(videoIDs, item.Id.VideoId)
+		videos = append(videos, model.Video{ID: item.Id.VideoId, Title: item.Snippet.Title})
 	}
-	return videoIDs
+	return videos
 }
 
-// GetCommentsByVideoIDs is get comments to use video id
+// GetCommentsByVideoID is get comments to use video id
 func (c *Client) GetCommentsByVideoID(videoID string, maxResults int64) []string {
 	call := c.service.CommentThreads.List("snippet")
 	call = call.VideoId(videoID).MaxResults(maxResults).TextFormat("plainText")

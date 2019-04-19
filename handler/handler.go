@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/gtongy/youtube-comments-crawler/model"
+	"github.com/gtongy/youtube-comments-crawler/repository"
 	"github.com/gtongy/youtube-comments-crawler/s3"
 	"github.com/gtongy/youtube-comments-crawler/youtubeWrapper"
 	"github.com/guregu/dynamo"
@@ -18,11 +19,13 @@ import (
 
 const (
 	region           = endpoints.ApNortheast1RegionID
+	maxChannelCount  = 1
+	maxCommentCount  = 30
 	dynamodbEndpoint = "http://dynamodb:8000"
 	s3Endpoint       = "http://s3:9000"
 )
 
-func Handler(ctx context.Context, event events.CloudWatchEvent) ([]string, error) {
+func Handler(ctx context.Context, event events.CloudWatchEvent) (string, error) {
 	s3Session := session.Must(session.NewSession(s3.Config(region, s3Endpoint)))
 	downloder := s3.NewDownloader(
 		os.Getenv("SERVICE_ACCOUNT_KEY"),
@@ -49,9 +52,10 @@ func Handler(ctx context.Context, event events.CloudWatchEvent) ([]string, error
 		log.Fatalf("scan error: %v", err)
 	}
 	youtubeClient := youtubeWrapper.NewClient(b)
+	videoRepository := repository.Video{Table: db.Table("Videos")}
 	for _, youtuber := range youtubers {
-		videoIDs := youtubeClient.GetVideoIDsByChannelID(youtuber.ChannelID, 1)
-		comments := youtubeClient.GetCommentsByVideoID(videoIDs[0], 30)
+		videos := youtubeClient.GetVideosIDsByChannelID(youtuber.ChannelID, maxChannelCount)
+		savedVideos := videoRepository.Save(videos)
 	}
-	return []string{}, nil
+	return "success", nil
 }
