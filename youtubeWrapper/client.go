@@ -10,10 +10,6 @@ import (
 	"google.golang.org/api/youtube/v3"
 )
 
-const (
-	maxResult = 10
-)
-
 type Client struct {
 	service *youtube.Service
 }
