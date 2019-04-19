@@ -10,11 +10,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
+// Downloader is s3 download execute
 type Downloader struct {
 	manager           s3manager.Downloader
 	key, bucket, dest string
 }
 
+// NewDownloader is getting new Downloader
 func NewDownloader(key, bucket, dest string, session *session.Session) *Downloader {
 	return &Downloader{
 		manager: *s3manager.NewDownloader(session),
@@ -24,6 +26,7 @@ func NewDownloader(key, bucket, dest string, session *session.Session) *Download
 	}
 }
 
+// Download is download exec and to get filename
 func (d *Downloader) Download() (string, error) {
 	file, err := os.Create(d.dest)
 	if err != nil {

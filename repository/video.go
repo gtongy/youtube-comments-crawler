@@ -7,10 +7,13 @@ import (
 	"github.com/guregu/dynamo"
 )
 
+// Video is abstract to persist video object
 type Video struct {
 	Table dynamo.Table
 }
 
+// SaveAndGetVideos is save video and get saved video models
+// NOTE: if is already saved video, skip save
 func (v *Video) SaveAndGetVideos(videos []model.Video) []model.Video {
 	var savedVideos []model.Video
 
