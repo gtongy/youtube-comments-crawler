@@ -7,10 +7,12 @@ import (
 	"github.com/guregu/dynamo"
 )
 
+// Comment is abstract to persist comment object
 type Comment struct {
 	Table dynamo.Table
 }
 
+// Save is comments save
 func (c *Comment) Save(comments []model.Comment) {
 	batchSize := len(comments)
 	items := make([]interface{}, batchSize)
