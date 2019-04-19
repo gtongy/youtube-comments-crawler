@@ -10,9 +10,8 @@ import (
 )
 
 type Uploader struct {
-	manager s3manager.Uploader
-	key     string
-	bucket  string
+	manager     s3manager.Uploader
+	key, bucket string
 }
 
 func NewUploader(key, bucket string, session *session.Session) *Uploader {

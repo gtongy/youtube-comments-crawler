@@ -48,4 +48,4 @@ local-exec:
 	--env-vars env.json \
 	--event event.json \
 	--template=deploy/template/staging.yml \
-	--docker-network minio-network
+	--docker-network youtube-comments-crawler-network

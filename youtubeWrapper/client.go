@@ -51,7 +51,7 @@ func (c *Client) GetVideoIDsByChannelID(channelID string, maxResults int64) []st
 	return videoIDs
 }
 
-// GetCommentsByVideoID is get comments to use video id
+// GetCommentsByVideoIDs is get comments to use video id
 func (c *Client) GetCommentsByVideoID(videoID string, maxResults int64) []string {
 	call := c.service.CommentThreads.List("snippet")
 	call = call.VideoId(videoID).MaxResults(maxResults).TextFormat("plainText")
