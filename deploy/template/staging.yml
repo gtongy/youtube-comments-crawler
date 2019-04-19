@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: "AWS::Serverless-2016-10-31"
+Description: "このアプリケーションはLambdaを利用してYouTube Data APIをkickする関数です"
+Resources:
+  DLQ:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: "youtube-comments-crawler-dlq"
+      MessageRetentionPeriod: 1209600
+  YoutubeCommentCrawler:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: "main"
+      Runtime: "go1.x"
+      CodeUri: "../../main.zip"
+      FunctionName: "youtube-comments-crawler"
+      Role: "TODO: Lambdaに付与するIAM Roleを作成しここにARNを貼り付け"
+      MemorySize: 256
+      Timeout: 30
+      Events:
+        ScheduleEvent:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 12 * * ? *)
+      DeadLetterQueue:
+        Type: "SQS"
+        TargetArn: !Ref DLQ
+      Environment:
+        Variables:
+          ENV: "staging"
+          ACCESS_KEY: ""
+          SECRET_KEY: ""
+          SERVICE_ACCOUNT_KEY: ""
+          SERVICE_ACCOUNT_FILE_NAME: ""
+          SERVICE_BUCKET: ""

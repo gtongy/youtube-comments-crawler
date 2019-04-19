@@ -1,0 +1,20 @@
+version: "3"
+services:
+  dynamodb:
+    image: amazon/dynamodb-local
+    ports:
+      - 8000:8000
+    restart: always
+  s3:
+    image: minio/minio
+    ports:
+      - "9001:9000"
+    command: [server, /data]
+    environment:
+      - "MINIO_ACCESS_KEY=dummydummydummy"
+      - "MINIO_SECRET_KEY=dummydummydummy"
+      - "MINIO_REGION=ap-northeast-1"
+networks:
+  default:
+    external:
+      name: youtube-comments-crawler-network
