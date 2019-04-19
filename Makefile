@@ -19,8 +19,8 @@ list-tables:
 	--region ap-northeast-1 \
 	--endpoint-url http://localhost:8000
 
-ATTRIBUTE_DEFINITIONS ?= '[{"AttributeName":"key","AttributeType": "S"}]'
-KEY_SCHEMA ?= '[{"AttributeName":"key","KeyType": "HASH"}]'
+ATTRIBUTE_DEFINITIONS ?= '[{"AttributeName":"id","AttributeType": "N"}]'
+KEY_SCHEMA ?= '[{"AttributeName":"id","KeyType": "HASH"}]'
 PROVISIONED_THROUGHPUT ?= '{"ReadCapacityUnits": 5,"WriteCapacityUnits": 5}'
 
 create-table:
@@ -29,6 +29,17 @@ create-table:
 	--attribute-definitions $(ATTRIBUTE_DEFINITIONS) \
 	--key-schema $(KEY_SCHEMA) \
 	--provisioned-throughput $(PROVISIONED_THROUGHPUT) \
+	--endpoint-url http://localhost:8000
+
+delete-table:
+	aws dynamodb delete-table --table-name $(TABLE_NAME) \
+	--region ap-northeast-1 \
+	--endpoint-url http://localhost:8000
+
+put-item:
+	aws dynamodb put-item --table-name $(TABLE_NAME) \
+	--item '$(ITEM)' \
+	--region ap-northeast-1 \
 	--endpoint-url http://localhost:8000
 
 local-exec:
