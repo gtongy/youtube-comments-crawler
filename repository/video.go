@@ -11,7 +11,7 @@ type Video struct {
 	Table dynamo.Table
 }
 
-func (v *Video) Save(videos []model.Video) []model.Video {
+func (v *Video) SaveAndGetVideos(videos []model.Video) []model.Video {
 	var savedVideos []model.Video
 
 	for _, video := range videos {

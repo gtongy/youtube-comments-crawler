@@ -53,9 +53,14 @@ func Handler(ctx context.Context, event events.CloudWatchEvent) (string, error) 
 	}
 	youtubeClient := youtubeWrapper.NewClient(b)
 	videoRepository := repository.Video{Table: db.Table("Videos")}
+	commentRepository := repository.Comment{Table: db.Table("Comments")}
 	for _, youtuber := range youtubers {
 		videos := youtubeClient.GetVideosIDsByChannelID(youtuber.ChannelID, maxChannelCount)
-		savedVideos := videoRepository.Save(videos)
+		savedVideos := videoRepository.SaveAndGetVideos(videos)
+		for _, savedVideo := range savedVideos {
+			comments := youtubeClient.GetCommentsByVideoID(savedVideo.ID, maxCommentCount)
+			commentRepository.Save(comments)
+		}
 	}
 	return "success", nil
 }

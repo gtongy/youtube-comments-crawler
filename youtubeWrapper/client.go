@@ -2,10 +2,10 @@ package youtubeWrapper
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/gtongy/youtube-comments-crawler/model"
+	"github.com/rs/xid"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/youtube/v3"
 )
@@ -54,15 +54,22 @@ func (c *Client) GetVideosIDsByChannelID(channelID string, maxResults int64) []m
 }
 
 // GetCommentsByVideoID is get comments to use video id
-func (c *Client) GetCommentsByVideoID(videoID string, maxResults int64) []string {
+func (c *Client) GetCommentsByVideoID(videoID string, maxResults int64) []model.Comment {
 	call := c.service.CommentThreads.List("snippet")
 	call = call.VideoId(videoID).MaxResults(maxResults).TextFormat("plainText")
 	response, err := call.Do()
 	handleError(err, "")
-	var comments []string
+	var comments []model.Comment
 	for _, item := range response.Items {
-		fmt.Println(item.Snippet.TopLevelComment.Snippet.TextDisplay)
-		comments = append(comments, item.Snippet.TopLevelComment.Snippet.TextDisplay)
+		comments = append(comments, model.Comment{
+			ID:   getXID(),
+			Text: item.Snippet.TopLevelComment.Snippet.TextDisplay,
+		})
 	}
 	return comments
+}
+
+func getXID() string {
+	guid := xid.New()
+	return guid.String()
 }
