@@ -2,15 +2,12 @@ package youtubeWrapper
 
 import (
 	"context"
-	"fmt"
 	"log"
 
+	"github.com/gtongy/youtube-comments-crawler/model"
+	"github.com/rs/xid"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/youtube/v3"
-)
-
-const (
-	maxResult = 10
 )
 
 type Client struct {
@@ -38,29 +35,37 @@ func NewClient(secretFile []byte) Client {
 	return Client{service: service}
 }
 
-// GetVideoIDsByChannelID is get video ids to use channel id
-func (c *Client) GetVideoIDsByChannelID(channelID string, maxResults int64) []string {
+// GetVideosIDsByChannelID is get video ids to use channel id
+// TODO: model.Video type is invalid
+func (c *Client) GetVideosIDsByChannelID(channelID string, maxResults int64) []model.Video {
 	call := c.service.Search.List("snippet")
 	call = call.ChannelId(channelID).MaxResults(maxResults).Order("date").Type("video")
 	response, err := call.Do()
 	handleError(err, "")
-	var videoIDs []string
+	var videos []model.Video
 	for _, item := range response.Items {
-		videoIDs = append(videoIDs, item.Id.VideoId)
+		videos = append(videos, model.Video{ID: item.Id.VideoId, Title: item.Snippet.Title})
 	}
-	return videoIDs
+	return videos
 }
 
 // GetCommentsByVideoID is get comments to use video id
-func (c *Client) GetCommentsByVideoID(videoID string, maxResults int64) []string {
+func (c *Client) GetCommentsByVideoID(videoID string, maxResults int64) []model.Comment {
 	call := c.service.CommentThreads.List("snippet")
 	call = call.VideoId(videoID).MaxResults(maxResults).TextFormat("plainText")
 	response, err := call.Do()
 	handleError(err, "")
-	var comments []string
+	var comments []model.Comment
 	for _, item := range response.Items {
-		fmt.Println(item.Snippet.TopLevelComment.Snippet.TextDisplay)
-		comments = append(comments, item.Snippet.TopLevelComment.Snippet.TextDisplay)
+		comments = append(comments, model.Comment{
+			ID:   getXID(),
+			Text: item.Snippet.TopLevelComment.Snippet.TextDisplay,
+		})
 	}
 	return comments
+}
+
+func getXID() string {
+	guid := xid.New()
+	return guid.String()
 }

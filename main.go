@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/gtongy/used-clouthes-youtube-title-crawling/handler"
+	"github.com/gtongy/youtube-comments-crawler/handler"
 )
 
 func main() {

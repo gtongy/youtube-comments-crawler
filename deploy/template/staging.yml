@@ -5,15 +5,15 @@ Resources:
   DLQ:
     Type: "AWS::SQS::Queue"
     Properties:
-      QueueName: "used-clouthes-youtube-title-crawling-dlq"
+      QueueName: "youtube-comments-crawler-dlq"
       MessageRetentionPeriod: 1209600
-  UsedClouthesYoutubeTitleCrawling:
+  YoutubeCommentCrawler:
     Type: "AWS::Serverless::Function"
     Properties:
       Handler: "main"
       Runtime: "go1.x"
       CodeUri: "../../main.zip"
-      FunctionName: "used-clouthes-youtube-title-crawling"
+      FunctionName: "youtube-comments-crawler"
       Role: "TODO: Lambdaに付与するIAM Roleを作成しここにARNを貼り付け"
       MemorySize: 256
       Timeout: 30
@@ -31,4 +31,5 @@ Resources:
           ACCESS_KEY: ""
           SECRET_KEY: ""
           SERVICE_ACCOUNT_KEY: ""
+          SERVICE_ACCOUNT_FILE_NAME: ""
           SERVICE_BUCKET: ""
