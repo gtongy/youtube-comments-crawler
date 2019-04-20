@@ -17,13 +17,17 @@ import (
 )
 
 const (
-	region           = endpoints.ApNortheast1RegionID
-	maxVideosCount   = 1
-	maxCommentsCount = 30
-	dynamodbEndpoint = "http://dynamodb:8000"
-	s3Endpoint       = "http://s3:9000"
+	region             = endpoints.ApNortheast1RegionID
+	maxVideosCount     = 1
+	maxCommentsCount   = 30
+	videosTableName    = "YoutubeCommentsCrawlerVideos"
+	commentsTableName  = "YoutubeCommentsCrawlerComments"
+	youtubersTableName = "YoutubeCommentsCrawlerYoutubers"
+	dynamodbEndpoint   = "http://dynamodb:8000"
+	s3Endpoint         = "http://s3:9000"
 )
 
+// Handler ここで定義した関数内の処理を実行する
 func Handler(ctx context.Context, event events.CloudWatchEvent) (string, error) {
 	filename := serviceAccountFileDownload()
 	b, err := ioutil.ReadFile(filename)
@@ -36,17 +40,23 @@ func Handler(ctx context.Context, event events.CloudWatchEvent) (string, error) 
 	db := dynamo.New(session.New(), dynamodb.Config(region, dynamodbEndpoint))
 
 	youtubeClient := youtube.NewClient(b)
-	videoRepository := repository.Video{Table: db.Table("Videos")}
-	commentRepository := repository.Comment{Table: db.Table("Comments")}
-	youtuberRepository := repository.Youtuber{Table: db.Table("Youtubers")}
+
+	videoRepository := repository.Video{Table: db.Table(videosTableName)}
+	commentRepository := repository.Comment{Table: db.Table(commentsTableName)}
+	youtuberRepository := repository.Youtuber{Table: db.Table(youtubersTableName)}
+
 	for _, youtuber := range youtuberRepository.ScanAll() {
+
 		videos := youtubeClient.GetVideosIDsByChannelID(youtuber.ChannelID, maxVideosCount)
 		savedVideos := videoRepository.SaveAndGetVideos(videos)
+
 		for _, savedVideo := range savedVideos {
 			comments := youtubeClient.GetCommentsByVideoID(savedVideo.ID, maxCommentsCount)
 			commentRepository.Save(comments)
 		}
+
 	}
+
 	return "success", nil
 }
 
