@@ -11,6 +11,7 @@ create-package:
 	--template-file ./deploy/template/production.yml \
 	--output-template-file package.template.yml \
 	--s3-bucket $(CREATE_PACKAGE_BUCKET_NAME)
+
 deploy-package:
 	sam deploy \
 	--template-file ./package.template.yml \
@@ -65,5 +66,5 @@ local-exec:
 	--region ap-northeast-1 \
 	--env-vars env.json \
 	--event event.json \
-	--template=deploy/template/staging.yml \
+	--template=deploy/template/production.yml \
 	--docker-network youtube-comments-crawler-network
