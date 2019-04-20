@@ -5,6 +5,19 @@ main-zip: build
 clean:
 	rm -f main main.zip
 
+# deploy
+create-package:
+	sam package \
+	--template-file ./deploy/template/production.yml \
+	--output-template-file package.template.yml \
+	--s3-bucket $(CREATE_PACKAGE_BUCKET_NAME)
+deploy-package:
+	sam deploy \
+	--template-file ./package.template.yml \
+	--region ap-northeast-1 \
+	--stack-name youtube-comments-crawler \
+	--capabilities CAPABILITY_IAM
+
 generate-event:
 	sam local generate-event cloudwatch scheduled-event \
 	--region ap-northeast-1 > event.json
