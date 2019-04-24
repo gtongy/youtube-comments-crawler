@@ -6,7 +6,7 @@ This function is youtube comment crawler to use AWS SAM.
 
 This function has the following configuration.
 
-![AWS Diagram](https://github.com/gtongy/test_doc/blob/images/aws-youtube-comments-crawler.png)
+![AWS Diagram](https://github.com/gtongy/youtube-comments-crawler/blob/master/images/aws-youtube-comments-crawler.png)
 
 This function is use under AWS Service
 
