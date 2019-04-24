@@ -5,7 +5,9 @@ This function is youtube comment crawler to use AWS SAM.
 ## Description
 
 This function has the following configuration.
-// TODO: image
+
+![AWS Diagram](https://github.com/gtongy/test_doc/blob/images/aws-youtube-comments-crawler.png)
+
 This function is use under AWS Service
 
 - Compute
@@ -14,12 +16,12 @@ This function is use under AWS Service
 - Database
   - DynamoDB
     - Resource Storage
-- Deployment & Management
-  - CloudFormation
-    - Create deploy stack
 - Administration & Security
   - CloudWatch
     - Schedule Event, and Logging
+- Deployment & Management
+  - CloudFormation
+    - Create deploy stack
 
 ## Requirement
 
@@ -59,15 +61,34 @@ $ pip install --user aws-sam-cli
 Before execute commands, you need to get google service account with YouTube Data API certification enabled.
 After clone this repository, the following command will be executed.
 
-- If you want to execute lambda local
+- container up
 
-```
+```sh
 $ cd /path/to/youtube-comments-crawler
 $ make create-network && docker-compose up -d
+```
+
+- put item
+
+```sh
+$  make put-item TABLE_NAME='YoutubeCommentsCrawlerYoutubers' ITEM='{ "id": { "S": "unique xid insert" }, "name": { "S": "Please Input Youtuber Name" }, "channel_id": { "S": "Please Input Youtuber Channel ID" }}'
+```
+
+- create dummy tables
+
+```sh
+ $ make create-table TABLE_NAME="YoutubeCommentsCrawlerVideos"
+ $ make create-table TABLE_NAME="YoutubeCommentsCrawlerComments"
+ $ make create-table TABLE_NAME="YoutubeCommentsCrawlerYoutubers"
+```
+
+- execute lambda local
+
+```sh
+$ cd /path/to/youtube-comments-crawler
 $ aws s3 cp /path/to/service-account.json s3://google-service-accounts-dev/youtube-comments-crawler \
 --endpoint-url=http://localhost:9001 \
---region ap-northeast-1 --profile minio
-
+--region ap-northeast-1 --profile $MINIO_PROFILE
 ```
 
 ### Deploy
@@ -75,7 +96,7 @@ $ aws s3 cp /path/to/service-account.json s3://google-service-accounts-dev/youtu
 Deploy is direct create croudformation stack.
 Inside calls sam package, sam deploy. Please Look at Makefile.
 
-```
+```sh
 $ make create-package
 $ make deploy-package
 ```
