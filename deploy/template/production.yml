@@ -24,3 +24,4 @@ Resources:
           SERVICE_ACCOUNT_KEY: ""
           SERVICE_ACCOUNT_FILE_NAME: ""
           SERVICE_BUCKET: ""
+          COMMENT_BUCKET: ""
