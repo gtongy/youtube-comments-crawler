@@ -57,6 +57,7 @@ func (c *Client) GetCommentsByVideoID(videoID string, maxResults int64) CommentR
 		commentResponse = append(commentResponse, model.Comment{
 			ID:   getXID(),
 			Text: item.Snippet.TopLevelComment.Snippet.TextDisplay,
+			PublishedAt: item.Snippet.TopLevelComment.Snippet.PublishedAt,
 		})
 	}
 	return commentResponse
