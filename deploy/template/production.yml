@@ -25,3 +25,5 @@ Resources:
           SERVICE_ACCOUNT_FILE_NAME: ""
           SERVICE_BUCKET: ""
           COMMENT_BUCKET: ""
+          MAX_VIDEOS_COUNT: ""
+          MAX_COMMNETS_COUNT: ""
