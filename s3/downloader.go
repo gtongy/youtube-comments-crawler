@@ -1,7 +1,6 @@
 package s3
 
 import (
-	"log"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -33,13 +32,12 @@ func (d *Downloader) Download() (string, error) {
 		return "", err
 	}
 	defer file.Close()
-	numBytes, err := d.manager.Download(file, &s3.GetObjectInput{
+	_, err = d.manager.Download(file, &s3.GetObjectInput{
 		Bucket: aws.String(d.bucket),
 		Key:    aws.String(d.key),
 	})
 	if err != nil {
 		return "", err
 	}
-	log.Print("Downloaded", file.Name(), numBytes, "bytes")
 	return file.Name(), nil
 }
