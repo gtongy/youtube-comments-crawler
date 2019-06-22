@@ -11,11 +11,14 @@ import (
 
 	"encoding/json"
 
+	"github.com/aws/aws-xray-sdk-go/xray"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/gtongy/youtube-comments-crawler/dynamodb"
+	localDynamo "github.com/gtongy/youtube-comments-crawler/dynamodb"
 	"github.com/gtongy/youtube-comments-crawler/repository"
 	"github.com/gtongy/youtube-comments-crawler/s3"
 	"github.com/gtongy/youtube-comments-crawler/youtube"
@@ -47,9 +50,9 @@ func Handler(ctx context.Context, event events.CloudWatchEvent) (string, error) 
 		log.Fatalf("Unable to read client secret file: %v", err)
 		return "", err
 	}
-
-	db := dynamo.New(session.New(), dynamodb.Config(region, dynamodbEndpoint))
-
+	dynamoDBIFace := dynamodb.New(session.New(), localDynamo.Config(region, dynamodbEndpoint))
+	xray.AWS(dynamoDBIFace.Client)
+	db := dynamo.NewFromIface(dynamoDBIFace)
 	youtubeClient := youtube.NewClient(b)
 
 	videoRepository := repository.Video{Table: db.Table(videosTableName)}
