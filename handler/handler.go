@@ -50,18 +50,18 @@ func Handler(ctx context.Context, event events.CloudWatchEvent) (string, error) 
 		log.Fatalf("Unable to read client secret file: %v", err)
 		return "", err
 	}
+	xray.Configure(xray.Config{LogLevel: "trace"})
 	dynamoDBIFace := dynamodb.New(session.New(), localDynamo.Config(region, dynamodbEndpoint))
 	xray.AWS(dynamoDBIFace.Client)
 	db := dynamo.NewFromIface(dynamoDBIFace)
 	youtubeClient := youtube.NewClient(b)
-
 	videoRepository := repository.Video{Table: db.Table(videosTableName)}
 	youtuberRepository := repository.Youtuber{Table: db.Table(youtubersTableName)}
 	uploader := s3.NewUploader(os.Getenv("COMMENT_BUCKET"), *s3manager.NewUploader(s3Session))
 	currentTime := time.Now().Format(timeFormat)
-	for _, youtuber := range youtuberRepository.ScanAll() {
+	for _, youtuber := range youtuberRepository.ScanAllWithContext(ctx) {
 		videos := youtubeClient.GetVideosIDsByChannelID(youtuber.ChannelID, maxVideosCount)
-		savedVideos := videoRepository.SaveAndGetVideos(videos)
+		savedVideos := videoRepository.SaveAndGetVideosWithContext(ctx, videos)
 		for _, savedVideo := range savedVideos {
 			comments := youtubeClient.GetCommentsByVideoID(savedVideo.ID, maxCommentsCount)
 			commentsJSON, err := json.Marshal(&comments)
