@@ -17,10 +17,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	localDynamo "github.com/gtongy/youtube-comments-crawler/dynamodb"
 	"github.com/gtongy/youtube-comments-crawler/repository"
-	"github.com/gtongy/youtube-comments-crawler/s3"
+	localS3 "github.com/gtongy/youtube-comments-crawler/s3"
 	"github.com/gtongy/youtube-comments-crawler/youtube"
 	"github.com/guregu/dynamo"
 )
@@ -42,22 +43,25 @@ var (
 
 // Handler ここで定義ßßした関数内の処理を実行する
 func Handler(ctx context.Context, event events.CloudWatchEvent) (string, error) {
-	s3Session := session.Must(session.NewSession(s3.Config(region, s3Endpoint)))
-	filename := serviceAccountFileDownload(s3Session)
+	xray.Configure(xray.Config{LogLevel: "trace"})
+	s3Session := session.Must(session.NewSession(localS3.Config(region, s3Endpoint)))
+	filename := serviceAccountFileDownloadWithContext(ctx, s3Session)
 	b, err := ioutil.ReadFile(filename)
 
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 		return "", err
 	}
-	xray.Configure(xray.Config{LogLevel: "trace"})
 	dynamoDBIFace := dynamodb.New(session.New(), localDynamo.Config(region, dynamodbEndpoint))
 	xray.AWS(dynamoDBIFace.Client)
 	db := dynamo.NewFromIface(dynamoDBIFace)
 	youtubeClient := youtube.NewClient(b)
 	videoRepository := repository.Video{Table: db.Table(videosTableName)}
 	youtuberRepository := repository.Youtuber{Table: db.Table(youtubersTableName)}
-	uploader := s3.NewUploader(os.Getenv("COMMENT_BUCKET"), *s3manager.NewUploader(s3Session))
+
+	uploaderIFace := s3.New(s3Session)
+	xray.AWS(uploaderIFace.Client)
+	uploader := localS3.NewUploader(os.Getenv("COMMENT_BUCKET"), *s3manager.NewUploaderWithClient(uploaderIFace))
 	currentTime := time.Now().Format(timeFormat)
 	for _, youtuber := range youtuberRepository.ScanAllWithContext(ctx) {
 		videos := youtubeClient.GetVideosIDsByChannelID(youtuber.ChannelID, maxVideosCount)
@@ -68,20 +72,22 @@ func Handler(ctx context.Context, event events.CloudWatchEvent) (string, error) 
 			if err != nil {
 				log.Fatalf("%v", err)
 			}
-			uploader.Upload(currentTime+savedVideo.ID+".json", bytes.NewReader(commentsJSON))
+			uploader.UploadWithContext(ctx, currentTime+savedVideo.ID+".json", bytes.NewReader(commentsJSON))
 		}
 	}
 	return "success", nil
 }
 
-func serviceAccountFileDownload(s3Session *session.Session) string {
-	downloder := s3.NewDownloader(
+func serviceAccountFileDownloadWithContext(ctx context.Context, s3Session *session.Session) string {
+	downloaderIFace := s3.New(s3Session)
+	xray.AWS(downloaderIFace.Client)
+	downloder := localS3.NewDownloader(
+		*s3manager.NewDownloaderWithClient(downloaderIFace),
 		os.Getenv("SERVICE_ACCOUNT_KEY"),
 		os.Getenv("SERVICE_BUCKET"),
 		"/tmp/"+os.Getenv("SERVICE_ACCOUNT_FILE_NAME"),
-		s3Session,
 	)
-	filename, err := downloder.Download()
+	filename, err := downloder.DownloadWithContext(ctx)
 	if err != nil {
 		log.Fatalf("Unable to download: %v", err)
 	}
