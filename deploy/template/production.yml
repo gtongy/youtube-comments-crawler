@@ -1,16 +1,17 @@
-AWSTemplateFormatVersion: "2010-09-09"
-Transform: "AWS::Serverless-2016-10-31"
-Description: "This application use youtube comments crawler"
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: 'This application use youtube comments crawler'
 Resources:
   YoutubeCommentCrawler:
-    Type: "AWS::Serverless::Function"
+    Type: 'AWS::Serverless::Function'
     Properties:
-      Handler: "main"
-      Runtime: "go1.x"
-      CodeUri: "../../main.zip"
-      FunctionName: "youtube-comments-crawler"
+      Handler: 'main'
+      Runtime: 'go1.x'
+      CodeUri: '../../main.zip'
+      FunctionName: 'youtube-comments-crawler'
       MemorySize: 256
       Timeout: 30
+      Tracing: Active
       Events:
         ScheduleEvent:
           Type: Schedule
@@ -18,12 +19,12 @@ Resources:
             Schedule: cron(0 12 * * ? *)
       Environment:
         Variables:
-          ENV: ""
-          ACCESS_KEY: ""
-          SECRET_KEY: ""
-          SERVICE_ACCOUNT_KEY: ""
-          SERVICE_ACCOUNT_FILE_NAME: ""
-          SERVICE_BUCKET: ""
-          COMMENT_BUCKET: ""
-          MAX_VIDEOS_COUNT: ""
-          MAX_COMMNETS_COUNT: ""
+          ENV: ''
+          ACCESS_KEY: ''
+          SECRET_KEY: ''
+          SERVICE_ACCOUNT_KEY: ''
+          SERVICE_ACCOUNT_FILE_NAME: ''
+          SERVICE_BUCKET: ''
+          COMMENT_BUCKET: ''
+          MAX_VIDEOS_COUNT: ''
+          MAX_COMMNETS_COUNT: ''

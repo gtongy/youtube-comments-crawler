@@ -22,6 +22,8 @@ This function is use under AWS Service
 - Deployment & Management
   - CloudFormation
     - Create deploy stack
+  - X-Ray
+    - trace func exec and aws services
 
 ## Requirement
 
