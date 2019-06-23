@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"log"
 
 	"github.com/gtongy/youtube-comments-crawler/model"
@@ -12,13 +13,13 @@ type Video struct {
 	Table dynamo.Table
 }
 
-// SaveAndGetVideos is save video and get saved video models
+// SaveAndGetVideosWithContext is save video and get saved video models
 // NOTE: if is already saved video, skip save
-func (v *Video) SaveAndGetVideos(videos []model.Video) []model.Video {
+func (v *Video) SaveAndGetVideosWithContext(ctx context.Context, videos []model.Video) []model.Video {
 	var savedVideos []model.Video
 
 	for _, video := range videos {
-		count, err := v.Table.Get("id", video.ID).Count()
+		count, err := v.Table.Get("id", video.ID).CountWithContext(ctx)
 		if err != nil {
 			log.Fatalf("%v", err)
 		}
@@ -32,7 +33,7 @@ func (v *Video) SaveAndGetVideos(videos []model.Video) []model.Video {
 	for key, savedVideo := range savedVideos {
 		items[key] = savedVideo
 	}
-	wrote, err := v.Table.Batch().Write().Put(items...).Run()
+	wrote, err := v.Table.Batch().Write().Put(items...).RunWithContext(ctx)
 	if err != nil {
 		log.Fatalf("%v", err)
 	}

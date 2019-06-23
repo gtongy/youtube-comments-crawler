@@ -1,6 +1,7 @@
 package s3
 
 import (
+	"context"
 	"io"
 	"log"
 
@@ -11,7 +12,7 @@ import (
 
 // UploaderAPI Uploaderの機能を有したinterface
 type UploaderAPI interface {
-	Upload(key string, r io.Reader) error
+	UploadWithContext(ctx context.Context, key string, r io.Reader) error
 }
 
 // Uploader s3への画像のアップロードを行う構造体
@@ -28,9 +29,9 @@ func NewUploader(bucket string, s3Manager s3manageriface.UploaderAPI) UploaderAP
 	}
 }
 
-// Upload s3へのアップロードの実行
-func (u *Uploader) Upload(key string, r io.Reader) error {
-	_, err := u.manager.Upload(&s3manager.UploadInput{
+// UploadWithContext s3へのアップロードの実行
+func (u *Uploader) UploadWithContext(ctx context.Context, key string, r io.Reader) error {
+	_, err := u.manager.UploadWithContext(ctx, &s3manager.UploadInput{
 		Bucket: aws.String(u.bucket),
 		Key:    aws.String(key),
 		Body:   r,
